@@ -1,0 +1,409 @@
+<html>
+
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-154196910-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-154196910-2');
+    </script>
+
+    <title>WaifuBot Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+      }
+
+      #loading-screen {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: black;
+        opacity: 0.5;
+        z-index: 999;
+      }
+
+      .lds-spinner {
+        display: inline-block;
+        width: 80px;
+        height: 80px;
+      }
+      .lds-spinner div {
+        transform-origin: 40px 40px;
+        animation: lds-spinner 1.2s linear infinite;
+      }
+      .lds-spinner div:after {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 3px;
+        left: 37px;
+        width: 6px;
+        height: 18px;
+        border-radius: 20%;
+        background: #fff;
+      }
+      .lds-spinner div:nth-child(1) {
+        transform: rotate(0deg);
+        animation-delay: -1.1s;
+      }
+      .lds-spinner div:nth-child(2) {
+        transform: rotate(30deg);
+        animation-delay: -1s;
+      }
+      .lds-spinner div:nth-child(3) {
+        transform: rotate(60deg);
+        animation-delay: -0.9s;
+      }
+      .lds-spinner div:nth-child(4) {
+        transform: rotate(90deg);
+        animation-delay: -0.8s;
+      }
+      .lds-spinner div:nth-child(5) {
+        transform: rotate(120deg);
+        animation-delay: -0.7s;
+      }
+      .lds-spinner div:nth-child(6) {
+        transform: rotate(150deg);
+        animation-delay: -0.6s;
+      }
+      .lds-spinner div:nth-child(7) {
+        transform: rotate(180deg);
+        animation-delay: -0.5s;
+      }
+      .lds-spinner div:nth-child(8) {
+        transform: rotate(210deg);
+        animation-delay: -0.4s;
+      }
+      .lds-spinner div:nth-child(9) {
+        transform: rotate(240deg);
+        animation-delay: -0.3s;
+      }
+      .lds-spinner div:nth-child(10) {
+        transform: rotate(270deg);
+        animation-delay: -0.2s;
+      }
+      .lds-spinner div:nth-child(11) {
+        transform: rotate(300deg);
+        animation-delay: -0.1s;
+      }
+      .lds-spinner div:nth-child(12) {
+        transform: rotate(330deg);
+        animation-delay: 0s;
+      }
+      @keyframes lds-spinner {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+      }
+
+      #container-main {
+        border: 2px black;
+        height: 100%;
+        width: 100%;
+      }
+
+      #container-avatar {
+        background-color: cyan;
+        height: 100%;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        background-image: url("/static/background.jpg");
+        background-position: center;
+        background-size: cover;
+      }
+
+      @keyframes breathing {
+        0% {top:0;}
+        50% {top:5px;}
+        100% {top:0;}
+      }
+
+      #avatar-image-holder {
+        position: relative;
+        height: 100%;
+        animation-name: breathing;
+        animation-duration: 4s;
+        animation-iteration-count: infinite;
+      }
+
+      #avatar-image-main {
+        height: 100%;
+        object-fit: contain;
+      }
+
+      #avatar-image-blink {
+        height: 100%;
+        display: none;
+        object-fit: contain;
+      }
+
+      #container-chat {
+        height: 100%;
+        width: 100%;
+        font-family: Helvetica, sans-serif;
+      }
+
+      #chat-content {
+        background-color: #222222;
+        height: 100%;
+        padding: 1rem 1rem 0 1rem;
+        overflow-y: scroll;
+      }
+
+      #chat-content-rows {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-content-row {
+        background-color: #DDDDDD;
+        font-size: 1rem;
+        padding: 0.5rem;
+        margin: 0 0 0.5rem 0;
+        max-width: 75%;
+        border-radius: 1rem;
+        word-break: break-word;
+      }
+
+      .chat-content-user {
+        align-self: flex-end;
+      }
+
+      .chat-content-bot {
+        align-self: flex-start;
+      }
+
+      #chat-typing-indicator {
+        visibility: hidden;
+        width: 100%;
+        padding: 0 0 0.75rem 0;
+        font-size: 0.75rem;
+        color: white;
+      }
+
+      #chat-input {
+        height: 3rem;
+        background-color: #DDDDDD;
+      }
+
+      #chat-input-form {
+        margin: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: row-reverse;
+      }
+
+      #chat-input-text {
+        background: 0;
+        border: 0;
+        height: 100%;
+        width: 100%;
+        padding: 0 10px;
+        font-size: 1rem;
+      }
+
+      #chat-input-button {
+        background-color: #444444;
+        color: white;
+        height: 100%;
+        width: 20%;
+        font-size: 1rem;
+        font-weight: bold;
+        padding: 0;
+        border: 0;
+      }
+
+      @media only screen and (min-width: 768px) {
+        #container-main {
+          flex-direction: row;
+        }
+
+        .chat-content-row {
+          margin: 0 0 1rem 0;
+        }
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div id="loading-screen">
+      <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+    </div>
+    <div id="container-main" class="container">
+      <div id="container-avatar" class="container">
+        <div id="avatar-image-holder">
+          <img id="avatar-image-main" src="/static/neutral.png">
+          <img id="avatar-image-blink" src="/static/blink.png">
+        </div>
+      </div>
+      <div id="container-chat" class="container">
+        <div id="chat-content">
+          <div id="chat-content-rows">
+            <div class="chat-content-row" v-for="message in messages"
+              v-bind:class="{'chat-content-user':message.author=='user',
+              'chat-content-bot':message.author=='bot'}"
+              v-bind:key="message.key">{{message.text}}</div>
+          </div>
+          <div id="chat-typing-indicator">Bot is typing...</div>
+        </div>
+        <div id="chat-input">
+          <form id="chat-input-form" autocomplete="off" v-on:submit.prevent="sendMessage">
+            <button id="chat-input-button">SEND</button>
+            <input id="chat-input-text" v-model="input" placeholder="Type a message...">
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.onload = function() {
+        var ws = new WebSocket("/ws")
+
+        var vue = new Vue({
+          el: "#container-main",
+          data: {
+            input: "",
+            messages: [],
+            maxMessages: 100,
+            messageCount: 0,
+            avatarState: "neutral",
+            isTyping: 0
+          },
+          mounted: function() {
+            ws.onmessage = function(event) {
+              if (event.data.label == "chat") {
+                this.decIsTyping()
+                this.messages.push({
+                  key: this.messageCount++,
+                  author: "bot",
+                  text: event.data.text
+                })
+                this.setAvatarStateFromSentiment(event.data.sentiment)
+                gtag("event", "receive_message", {
+                  "event_category": "chat",
+                  "non_interaction": true
+                })
+              }
+            }
+            setInterval(this.blink, 5000)
+          },
+          watch: {
+            isTyping: function(newIsTyping, oldIsTyping) {
+              var elChatTypingIndicator = document.getElementById("chat-typing-indicator")
+              if (newIsTyping > 0) {
+                elChatTypingIndicator.style.visibility = "visible"
+              } else {
+                elChatTypingIndicator.style.visibility = "hidden"
+              }
+            },
+            messages: {
+              handler: function(newMessages, oldMessages) {
+                if (this.messages.length > this.maxMessages) {
+                  this.messages = this.messages.slice(-this.maxMessages)
+                }
+                this.$nextTick(this.scrollToBottom)
+              },
+              deep: true
+            },
+            avatarState: function(newAvatarState, oldAvatarState) {
+              if (newAvatarState != oldAvatarState) {
+                this.setAvatarImage(newAvatarState)
+              }
+            }
+          },
+          methods: {
+            incIsTyping: function() {
+              this.isTyping += 1
+            },
+            decIsTyping: function() {
+              this.isTyping = Math.max(0, this.isTyping-1)
+            },
+            scrollToBottom: function() {
+              var elChatContent = document.getElementById("chat-content")
+              elChatContent.scrollTop = elChatContent.scrollHeight;
+            },
+            setAvatarImage: function(avatarState) {
+              var elAvatarImageMain = document.getElementById("avatar-image-main")
+              switch(avatarState) {
+                case "positive":
+                  elAvatarImageMain.src = "/static/positive.png"
+                  setTimeout(()=>this.avatarState="neutral", 2000)
+                  break
+                case "negative":
+                  elAvatarImageMain.src = "/static/negative.png"
+                  setTimeout(()=>this.avatarState="neutral", 2000)
+                  break
+                default:
+                  elAvatarImageMain.src = "/static/neutral.png"
+                  break
+              }
+            },
+            setAvatarStateFromSentiment: function(sentiment) {
+              if (sentiment >= 0.05) {
+                this.avatarState = "positive"
+              } else if (sentiment <= -0.05) {
+                this.avatarState = "negative"
+              } else {
+                this.avatarState = "neutral"
+              }
+            },
+            blink: function() {
+              if (this.avatarState == "neutral") {
+                var elAvatarImageMain = document.getElementById("avatar-image-main")
+                var elAvatarImageBlink = document.getElementById("avatar-image-blink")
+                elAvatarImageBlink.style.display = "inline"
+                elAvatarImageMain.style.display = "none"
+                setTimeout(()=>{
+                  elAvatarImageMain.style.display = "inline"
+                  elAvatarImageBlink.style.display = "none"
+                }, 100)
+              }
+            },
+            sendMessage: function() {
+              input = this.input.trim()
+              if (input) {
+                this.messages.push({
+                  key: this.messageCount++,
+                  author: "user",
+                  text: input
+                })
+                ws.send(JSON.stringify({
+                  "label": "chat",
+                  "text": input
+                })
+                this.input = ""
+                this.incIsTyping()
+                gtag("event", "send_message", {
+                  "event_category": "chat"
+                })
+              }
+            }
+          }
+        })
+      }
+    </script>
+  </body>
+
+</html>
