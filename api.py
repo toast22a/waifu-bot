@@ -34,8 +34,10 @@ def format_history(history):
     return ''.join([f'<|{message["author"]}|>{message["text"]}' for message in
         history[-10:]]) + '<|bot|>'
 
-def format_reply(reply):
-    return reply.strip()
+def format_reply(reply, username='User', botname='Bot'):
+    return reply.strip()\
+            .replace('<|username|>', username)\
+            .replace('<|botname|>', botname)
 
 @app.get("/")
 async def index():
@@ -58,7 +60,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     temperature=0.6,
                     repetition_penalty=2.0,
                     stop_tokens=['<|user|>', '<|bot|>', '<|endoftext|>']
-                ))
+                ), username=data['username'], botname=data['botname'])
                 await websocket.send_json({
                     'label': 'chat',
                     'text': reply,

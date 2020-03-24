@@ -287,14 +287,22 @@
           data: {
             input: "",
             messages: [],
-            userName: "User",
-            botName: "Aina",
+            userName: "",
+            botName: "",
             maxMessages: 100,
             messageCount: 0,
             avatarState: "neutral",
             isTyping: 0
           },
           mounted: function() {
+            while (!this.userName) {
+              this.userName = prompt("Enter your name: ")
+              if (this.userName) this.userName = this.userName.trim()
+            }
+            while (!this.botName) {
+              this.botName = prompt("Enter the bot's name: ")
+              if (this.botName) this.botName = this.botName.trim()
+            }
             ws.onmessage = (event)=>{
               var eventData = JSON.parse(event.data)
               if (eventData.label == "chat") {
@@ -406,7 +414,9 @@
                 })
                 ws.send(JSON.stringify({
                   "label": "chat",
-                  "history": this.messages.slice(-10)
+                  "history": this.messages.slice(-10),
+                  "username": this.userName,
+                  "botname": this.botName
                 }))
                 this.input = ""
                 this.incIsTyping()
